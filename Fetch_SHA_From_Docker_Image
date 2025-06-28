@@ -1,0 +1,50 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(name: 'buildTag', defaultValue: 'latest', description: 'Image tag to fetch digest for')
+  }
+
+  environment {
+    DOCKER_REPO = 'robotshop/cart'
+  }
+
+  stages {
+    stage('Get Docker Image Digest') {
+      steps {
+        sh '''
+          echo "🔍 Getting SHA digest for image: $DOCKER_REPO:$buildTag"
+
+          REPO=$DOCKER_REPO
+          TAG=$buildTag
+
+          echo "🧾 Fetching Docker Hub Token..."
+          TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r .token)
+
+          echo "📦 Getting manifest and extracting SHA..."
+          DIGEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            https://registry-1.docker.io/v2/$REPO/manifests/$TAG \
+            | jq -r .config.digest)
+
+          echo "✅ Image Digest: $DIGEST"
+
+          # Store it in a file or export for later stages
+          echo $DIGEST > image-sha.txt
+        '''
+      }
+    }
+
+    stage('Use Digest (Optional)') {
+      steps {
+        sh '''
+          SHA=$(cat image-sha.txt)
+          echo "Using image SHA in this stage: $SHA"
+
+          # Example: substitute this SHA into a Helm values.yaml
+          # sed -i "s|imageDigest:.*|imageDigest: $SHA|" values.yaml
+        '''
+      }
+    }
+  }
+}
