@@ -1,0 +1,16 @@
+pipeline {
+    agent any 
+    stages{
+        stage ("Deploy Helm to EKS")
+            steps{
+                sh '''
+                 aws eks update-kubeconfig --region us-east-1 --name your-cluster-name
+                 # Move to chart directory
+                 cd three-tier-architecture-demo/EKS/helm
+                 # Deploy using Helm
+                 helm upgrade --install robot-shop . -n robot-shop --create-namespace
+                 echo "eployment triggered to EKS" '''                
+                
+}}}
+        
+ 
