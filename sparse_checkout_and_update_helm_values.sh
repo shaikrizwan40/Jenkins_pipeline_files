@@ -1,6 +1,6 @@
 pipeline{
 
-agent any
+agent {label "EC2"}
 stages{
     stage("Checkout Git Repository"){
         steps{
