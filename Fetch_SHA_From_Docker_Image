@@ -4,6 +4,7 @@ pipeline {
   parameters {
     string(name: 'buildTag', defaultValue: 'latest', description: 'Image tag to fetch digest for')
   }
+environments{}
 
   environment {
     DOCKER_REPO = 'robotshop/cart'
