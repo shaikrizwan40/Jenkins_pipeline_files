@@ -1,6 +1,6 @@
 pipeline {
-    agent{ label "EC2"}
-    environment { Git_Password= credentials("GitHub")}
+    agent any
+    environment { Git_Password= credentials("GitHub_Credentials")}
     stages{
         stage("Git Checkout"){
             steps{
