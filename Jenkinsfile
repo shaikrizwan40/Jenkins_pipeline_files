@@ -3,23 +3,30 @@ pipeline {
     environment { Git_Password= credentials("GitHub_Credentials")}
     stages{
 
-stage('Check for Non-README Changes') {
+    stage('Check for README-only changes') {
       steps {
         script {
-          // Get list of changed files in this push
+          // Get list of changed files
           def changes = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim()
-          echo "Files changed:\n${changes}"
+          echo "🔍 Files changed:\n${changes}"
 
-          // If ONLY README.md changed, skip the build
-          if (changes == "README.md") {
-            echo "🛑 Only README.md changed. Skipping the build."
+          // Remove README.md from the list
+          def filtered = sh(script: "git diff --name-only HEAD~1 | grep -v '^README.md$' || true", returnStdout: true).trim()
+
+          // If no other file changed → exit pipeline early
+          if (filtered == "") {
+            echo "🛑 Only README.md changed. Exiting pipeline."
             currentBuild.result = 'SUCCESS'
-            // Exit the pipeline early
+            // Exit pipeline cleanly with success
+            // Using 'return' exits the `script` block and the rest of the pipeline
             return
           }
+
+          echo "✅ Important files changed. Continuing pipeline..."
         }
       }
     }
+
         stage("Git Checkout"){
             steps{
                 cleanWs()
