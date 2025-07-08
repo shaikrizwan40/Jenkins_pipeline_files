@@ -1,0 +1,34 @@
+pipeline{
+    agent any
+    tools {
+        maven 'apache-maven-3.9.10'
+    }
+    stages{
+        stage("checkout the project"){
+            steps{
+                git 'https://github.com/Shikhar82/springboot-maven-micro.git'
+            }
+        }
+        
+        stage("Build the Package"){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage("Sonar-Code Quality Check"){
+            steps{
+                withSonarQubeEnv(installationName:'Jenkins_Sonar_Qube'){
+                    sh "mvn sonar:sonar"
+                }
+              
+                timeout(time: 1, unit: 'HOURS') {
+                script(){    
+              def qg = waitForQualityGate()
+              if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+              }
+          }}
+            }
+        }
+    }
+}
