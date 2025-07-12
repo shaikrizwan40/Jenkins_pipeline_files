@@ -17,15 +17,17 @@ pipeline{
         }
         stage("Sonar-Code Quality Check"){
             steps{
-                withSonarQubeEnv(installationName:'Jenkins_Sonar_Qube'){
-                    sh "mvn sonar:sonar"
+                withSonarQubeEnv(installationName:'Jenkins_Sonar_Qube'){          #It tells jenkins to use the sonar configuration.Use this SonarQube environment (Jenkins_Sonar_Qube) for everything inside this { ... } block.
+                    sh "mvn sonar:sonar"                                          #Maven command to start the sonar scan.
                 }
               
-                timeout(time: 1, unit: 'HOURS') {
+                timeout(time: 1, unit: 'HOURS') {    #Wait up to 1 hour for SonarQube to tell me if my code is good.If it’s not, stop the pipeline.”
                 script(){    
-              def qg = waitForQualityGate()
-              if (qg.status != 'OK') {
-                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                      def qg = waitForQualityGate()
+                      if (qg.status != 'OK') {
+                          error "Pipeline aborted due to quality gate failure: ${qg.status}"
+
+#This waits for SonarQube Quality Gate results.qg holds the result of the check.A Quality Gate is a rule in SonarQube (e.g., "code coverage must be > 80%").
               }
           }}
             }
