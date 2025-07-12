@@ -28,6 +28,7 @@ pipeline{
                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
 
 #This waits for SonarQube Quality Gate results.qg holds the result of the check.A Quality Gate is a rule in SonarQube (e.g., "code coverage must be > 80%").
+#The error(...) step in Jenkins immediately fails the stage and stops the pipeline.It doesn’t just print the message — it throws a build error.The pipeline will show "FAILED" in Jenkins UI and exit there
               }
           }}
             }
